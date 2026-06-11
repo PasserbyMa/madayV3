@@ -81,7 +81,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="m : ${recentMembers}" th:onclick="|location.href='@{/members}?keyword='+[[${m.name}]]|" style="cursor:pointer">
+                        <tr th:each="m : ${recentMembers}" th:data-href="@{/members(keyword=${m.name})}" onclick="location.href=this.dataset.href" style="cursor:pointer">
                             <td th:text="${m.name}"></td>
                             <td th:text="${m.email}" style="color:var(--muted);font-size:0.8rem"></td>
                             <td>
