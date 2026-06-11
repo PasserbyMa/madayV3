@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.madayV3.blog.mapper.SubscriptionMapper">
+
+    <select id="findPage" resultType="com.madayV3.blog.dto.SubscriptionDto">
+        SELECT s.id, s.member_id AS memberId, s.plan_id AS planId,
+               m.name AS memberName,
+               p.plan_name AS planName,
+               p.monthly_fee AS monthlyFee,
+               DATE_FORMAT(s.start_date, '%Y-%m-%d') AS startDate,
+               DATE_FORMAT(s.end_date, '%Y-%m-%d') AS endDate,
+               s.status,
+               DATE_FORMAT(s.created_at, '%Y-%m-%d %H:%i') AS createdAt
+        FROM subscription s
+        JOIN member m ON s.member_id = m.id
+        JOIN plan p ON s.plan_id = p.id
+        ORDER BY s.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM subscription
+    </select>
+
+    <select id="findById" resultType="com.madayV3.blog.dto.SubscriptionDto">
+        SELECT s.id, s.member_id AS memberId, s.plan_id AS planId,
+               m.name AS memberName,
+               p.plan_name AS planName,
+               p.monthly_fee AS monthlyFee,
+               DATE_FORMAT(s.start_date, '%Y-%m-%d') AS startDate,
+               DATE_FORMAT(s.end_date, '%Y-%m-%d') AS endDate,
+               s.status,
+               DATE_FORMAT(s.created_at, '%Y-%m-%d %H:%i') AS createdAt
+        FROM subscription s
+        JOIN member m ON s.member_id = m.id
+        JOIN plan p ON s.plan_id = p.id
+        WHERE s.id = #{id}
+    </select>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(*) FROM subscription WHERE status = #{status}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO subscription (member_id, plan_id, start_date, end_date, status)
+        VALUES (#{memberId}, #{planId}, #{startDate}, #{endDate}, COALESCE(#{status}, 'ACTIVE'))
+    </insert>
+
+    <update id="update">
+        UPDATE subscription
+        SET plan_id = #{planId},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM subscription WHERE id = #{id}
+    </delete>
+
+</mapper>

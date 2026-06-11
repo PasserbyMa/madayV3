@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>고객 관리 - madayV3</title>
+    <meta th:name="_csrf"        th:content="${_csrf.token}">
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav>
+    <a class="nav-brand" th:href="@{/}">madayV3</a>
+    <div class="nav-links">
+        <a th:href="@{/}">대시보드</a>
+        <a th:href="@{/members}" class="active">고객 관리</a>
+        <a th:href="@{/subscriptions}">가입현황</a>
+    </div>
+    <div class="nav-auth">
+        <span sec:authorize="isAuthenticated()">
+            <span sec:authentication="name"></span> ·
+            <a th:href="@{/logout}">로그아웃</a>
+        </span>
+        <span sec:authorize="!isAuthenticated()">
+            <a th:href="@{/login}">로그인</a>
+        </span>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <div>
+            <div class="page-title">고객 관리</div>
+            <div class="page-sub">총 <span th:text="${totalCount}">0</span>명</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="memberModal.openAdd()">+ 고객 등록</button>
+    </div>
+
+    <!-- 검색 -->
+    <form th:action="@{/members}" method="get" class="search-row">
+        <input class="search-input" type="text" name="keyword" th:value="${keyword}" placeholder="이름 / 이메일 / 전화번호 검색">
+        <button type="submit" class="btn btn-secondary btn-sm">검색</button>
+        <a th:href="@{/members}" class="btn btn-secondary btn-sm">초기화</a>
+    </form>
+
+    <!-- 테이블 -->
+    <div class="panel">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>이름</th><th>이메일</th><th>전화번호</th>
+                        <th>생년월일</th><th>상태</th><th>등록일</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="m : ${members}" th:onclick="|memberModal.openView([[${m.id}]])|">
+                        <td th:text="${m.id}" style="color:var(--muted);font-size:0.8rem"></td>
+                        <td th:text="${m.name}" style="font-weight:500"></td>
+                        <td th:text="${m.email}" style="color:var(--muted);font-size:0.8rem"></td>
+                        <td th:text="${m.phone}"></td>
+                        <td th:text="${m.birthDate}" style="color:var(--muted);font-size:0.8rem"></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${m.status == 'ACTIVE'} ? 'badge-active' : 'badge-inactive'"
+                                  th:text="${m.status}"></span>
+                        </td>
+                        <td th:text="${m.createdAt}" style="color:var(--muted);font-size:0.8rem"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(members)}">
+                        <td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">데이터 없음</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination" th:if="${totalPages > 0}">
+        <a th:if="${currentPage > 1}" th:href="@{/members(page=${currentPage-1},keyword=${keyword})}">&laquo;</a>
+        <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <a th:href="@{/members(page=${i},keyword=${keyword})}"
+               th:text="${i}"
+               th:classappend="${i == currentPage} ? 'active'"></a>
+        </th:block>
+        <a th:if="${currentPage < totalPages}" th:href="@{/members(page=${currentPage+1},keyword=${keyword})}">&raquo;</a>
+    </div>
+</div>
+
+<!-- 고객 모달 -->
+<div id="memberModal" class="modal-overlay">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('memberModal')">✕</button>
+        <h3 id="memberModalTitle">고객 상세</h3>
+        <form id="memberForm" onsubmit="return false">
+            <input type="hidden" id="memberIdField">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>이름 *</label>
+                    <input type="text" id="fName" placeholder="홍길동">
+                </div>
+                <div class="form-group">
+                    <label>상태</label>
+                    <select id="memberStatus">
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label>이메일</label>
+                    <input type="email" id="fEmail" placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label>전화번호</label>
+                    <input type="text" id="fPhone" placeholder="010-0000-0000">
+                </div>
+                <div class="form-group">
+                    <label>생년월일</label>
+                    <input type="date" id="fBirth">
+                </div>
+                <div class="form-group full">
+                    <label>주소</label>
+                    <input type="text" id="fAddress" placeholder="서울시 강남구...">
+                </div>
+            </div>
+        </form>
+        <div class="modal-footer">
+            <button id="btnDeleteMember" class="btn btn-danger btn-sm"
+                    onclick="memberModal.delete(this.dataset.id)" style="margin-right:auto;display:none">삭제</button>
+            <button id="btnEditMember" class="btn btn-secondary btn-sm"
+                    onclick="memberModal.enableEdit()" style="display:none">수정</button>
+            <button id="btnSaveMember" class="btn btn-primary btn-sm"
+                    onclick="memberModal.save()">저장</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeModal('memberModal')">닫기</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const contextPath = /*[[${#request.contextPath}]]*/ '';
+</script>
+<script th:src="@{/js/app.js}"></script>
+<script>
+document.getElementById('btnDeleteMember').style.display = 'none';
+document.getElementById('btnEditMember').style.display = 'none';
+</script>
+</body>
+</html>

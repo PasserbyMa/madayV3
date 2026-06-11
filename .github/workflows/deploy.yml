@@ -1,0 +1,23 @@
+name: Deploy madayV3 to OCI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 129.154.55.20
+          username: ubuntu
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/java-v3/app
+            git pull origin main
+            cd /home/ubuntu/java-v3
+            docker-compose build app
+            docker-compose up -d
+            docker network connect mam_mablog_network javablog_v3_app || true

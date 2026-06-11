@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.madayV3.blog.mapper.MemberMapper">
+
+    <select id="findAll" resultType="com.madayV3.blog.dto.MemberDto">
+        SELECT id, name, email, phone,
+               DATE_FORMAT(birth_date, '%Y-%m-%d') AS birthDate,
+               address, status,
+               DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS createdAt,
+               DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i') AS updatedAt
+        FROM member ORDER BY created_at DESC
+    </select>
+
+    <select id="findPage" resultType="com.madayV3.blog.dto.MemberDto">
+        SELECT id, name, email, phone,
+               DATE_FORMAT(birth_date, '%Y-%m-%d') AS birthDate,
+               address, status,
+               DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS createdAt
+        FROM member
+        <where>
+            <if test="keyword != null and keyword != ''">
+                name LIKE CONCAT('%', #{keyword}, '%')
+                OR email LIKE CONCAT('%', #{keyword}, '%')
+                OR phone LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM member
+        <where>
+            <if test="keyword != null and keyword != ''">
+                name LIKE CONCAT('%', #{keyword}, '%')
+                OR email LIKE CONCAT('%', #{keyword}, '%')
+                OR phone LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" resultType="com.madayV3.blog.dto.MemberDto">
+        SELECT id, name, email, phone,
+               DATE_FORMAT(birth_date, '%Y-%m-%d') AS birthDate,
+               address, status,
+               DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS createdAt,
+               DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i') AS updatedAt
+        FROM member WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member (name, email, phone, birth_date, address, status)
+        VALUES (#{name}, #{email}, #{phone}, #{birthDate}, #{address}, COALESCE(#{status}, 'ACTIVE'))
+    </insert>
+
+    <update id="update">
+        UPDATE member
+        SET name = #{name},
+            email = #{email},
+            phone = #{phone},
+            birth_date = #{birthDate},
+            address = #{address},
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM member WHERE id = #{id}
+    </delete>
+
+</mapper>
