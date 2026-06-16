@@ -13,7 +13,7 @@ public class SqlService {
 
     public Object execute(String sql) {
         String upper = sql.trim().toUpperCase();
-        if (upper.startsWith("SELECT") || upper.startsWith("SHOW") || upper.startsWith("DESC")) {
+        if (upper.startsWith("SELECT") || upper.startsWith("SHOW") || upper.startsWith("DESC") || upper.startsWith("WITH")) {
             return jdbcTemplate.queryForList(sql);
         } else if (upper.startsWith("INSERT") || upper.startsWith("UPDATE") || upper.startsWith("DELETE")) {
             int rows = jdbcTemplate.update(sql);
