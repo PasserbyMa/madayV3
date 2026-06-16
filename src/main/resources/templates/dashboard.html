@@ -62,6 +62,11 @@
                     <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='SHOW TABLES;'">테이블 목록</button>
                     <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='DESC member;'">DESC member</button>
                     <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='SELECT m.name, p.plan_name, s.status FROM subscription s JOIN member m ON s.member_id=m.id JOIN plan p ON s.plan_id=p.id LIMIT 10;'">JOIN 예시</button>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='SELECT name, email FROM member\nWHERE id IN (\n  SELECT member_id FROM subscription s\n  JOIN plan p ON s.plan_id = p.id\n  WHERE p.monthly_fee > (SELECT AVG(monthly_fee) FROM plan)\n);'">서브쿼리</button>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='SELECT p.plan_name, COUNT(*) AS subscriber_count\nFROM subscription s JOIN plan p ON s.plan_id = p.id\nGROUP BY p.plan_name\nHAVING subscriber_count >= 2\nORDER BY subscriber_count DESC;'">GROUP BY + HAVING</button>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='SELECT m.name, p.plan_name, p.monthly_fee,\n       RANK() OVER (ORDER BY p.monthly_fee DESC) AS fee_rank\nFROM subscription s\nJOIN member m ON s.member_id = m.id\nJOIN plan p ON s.plan_id = p.id;'">윈도우 함수</button>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='WITH plan_revenue AS (\n  SELECT p.plan_name, SUM(p.monthly_fee) AS revenue\n  FROM subscription s\n  JOIN plan p ON s.plan_id = p.id\n  WHERE s.status = \'ACTIVE\'\n  GROUP BY p.plan_name\n)\nSELECT * FROM plan_revenue ORDER BY revenue DESC;'">CTE (WITH)</button>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sqlInput').value='SELECT name FROM member m\nWHERE NOT EXISTS (\n  SELECT 1 FROM subscription s WHERE s.member_id = m.id\n);'">가입 없는 고객</button>
                 </div>
                 <div id="sqlResult" class="sql-result" style="min-height:40px;"></div>
             </div>
@@ -96,6 +101,31 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- MariaDB SQL 연습 -->
+    <div class="panel" style="margin-top:1.25rem">
+        <div class="panel-header">
+            MariaDB SQL 연습 (도서관 테마: author / book / customer / orders)
+            <span sec:authorize="!isAuthenticated()" style="font-size:0.75rem;color:var(--muted)">
+                실행하려면 <a th:href="@{/login}" style="color:var(--accent)">로그인</a> 필요
+            </span>
+        </div>
+        <div class="panel-body">
+            <textarea id="mariaSqlInput" class="sql-textarea" rows="5"
+                      placeholder="SELECT * FROM book;"></textarea>
+            <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button class="btn btn-primary btn-sm" onclick="runMariaSql()">▶ 실행</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('mariaSqlInput').value='SHOW TABLES;'">테이블 목록</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('mariaSqlInput').value='SELECT b.title, a.name AS author, b.price\nFROM book b JOIN author a ON b.author_id = a.id;'">JOIN</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('mariaSqlInput').value='SELECT title, price FROM book\nWHERE price > (SELECT AVG(price) FROM book);'">서브쿼리</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('mariaSqlInput').value='SELECT a.name, COUNT(*) AS book_count, SUM(b.price*o.quantity) AS total_sales\nFROM orders o\nJOIN book b ON o.book_id=b.id\nJOIN author a ON b.author_id=a.id\nGROUP BY a.name\nHAVING total_sales > 20000\nORDER BY total_sales DESC;'">GROUP BY + HAVING</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('mariaSqlInput').value='SELECT c.name, SUM(b.price*o.quantity) AS spent,\n       RANK() OVER (ORDER BY SUM(b.price*o.quantity) DESC) AS rnk\nFROM orders o\nJOIN customer c ON o.customer_id=c.id\nJOIN book b ON o.book_id=b.id\nGROUP BY c.name;'">윈도우 함수</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('mariaSqlInput').value='WITH author_sales AS (\n  SELECT a.name, SUM(b.price*o.quantity) AS total\n  FROM orders o\n  JOIN book b ON o.book_id=b.id\n  JOIN author a ON b.author_id=a.id\n  GROUP BY a.name\n)\nSELECT * FROM author_sales WHERE total > 15000;'">CTE (WITH)</button>
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('mariaSqlInput').value='SELECT name FROM customer c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o WHERE o.customer_id = c.id\n);'">주문 없는 고객</button>
+            </div>
+            <div id="mariaSqlResult" class="sql-result" style="min-height:40px;"></div>
         </div>
     </div>
 </div>

@@ -22,7 +22,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/members", "/members/**", "/subscriptions", "/subscriptions/**").permitAll()
                 .requestMatchers("/css/**", "/js/**").permitAll()
-                .requestMatchers("/api/**", "/sql/**").authenticated()
+                .requestMatchers("/api/**", "/sql/**", "/maria-sql/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -38,6 +38,10 @@ public class SecurityConfig {
                 .defaultAuthenticationEntryPointFor(
                     (req, res, e) -> res.sendError(401, "Unauthorized"),
                     new AntPathRequestMatcher("/sql/**")
+                )
+                .defaultAuthenticationEntryPointFor(
+                    (req, res, e) -> res.sendError(401, "Unauthorized"),
+                    new AntPathRequestMatcher("/maria-sql/**")
                 )
             )
             .logout(logout -> logout.logoutSuccessUrl("/").permitAll());

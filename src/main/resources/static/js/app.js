@@ -10,15 +10,15 @@ function authHeaders(extra = {}) {
     return Object.assign(h, extra);
 }
 
-/* ========== SQL CONSOLE ========== */
-async function runSql() {
-    const sql = document.getElementById('sqlInput')?.value?.trim();
+/* ========== SQL CONSOLE (공통) ========== */
+async function executeSql(inputId, resultId, endpoint) {
+    const sql = document.getElementById(inputId)?.value?.trim();
     if (!sql) return;
-    const resultEl = document.getElementById('sqlResult');
+    const resultEl = document.getElementById(resultId);
     resultEl.innerHTML = '<span style="color:#8892a4">실행 중...</span>';
 
     try {
-        const res = await fetch(contextPath + '/sql/execute', {
+        const res = await fetch(contextPath + endpoint, {
             method: 'POST',
             headers: authHeaders(),
             body: JSON.stringify({ sql })
@@ -45,6 +45,9 @@ async function runSql() {
         resultEl.innerHTML = `<span style="color:#ef4444">네트워크 오류</span>`;
     }
 }
+
+function runSql() { executeSql('sqlInput', 'sqlResult', '/sql/execute'); }
+function runMariaSql() { executeSql('mariaSqlInput', 'mariaSqlResult', '/maria-sql/execute'); }
 
 /* ========== MODAL HELPERS ========== */
 function openModal(id) { document.getElementById(id)?.classList.add('open'); }
