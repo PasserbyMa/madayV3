@@ -1,16 +1,16 @@
 package com.madayV3.blog.controller;
 
 import com.madayV3.blog.service.MariaSqlService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/maria-sql")
+@RequiredArgsConstructor
 public class MariaSqlController {
 
-    @Autowired
-    private MariaSqlService mariaSqlService;
+    private final MariaSqlService mariaSqlService;
 
     @PostMapping("/execute")
     public Object execute(@RequestBody Map<String, String> body) {

@@ -2,15 +2,15 @@ package com.madayV3.blog.service;
 
 import com.madayV3.blog.dto.MemberDto;
 import com.madayV3.blog.mapper.MemberMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MemberService {
 
-    @Autowired
-    private MemberMapper memberMapper;
+    private final MemberMapper memberMapper;
 
     public List<MemberDto> getPage(int page, int size, String keyword) {
         int offset = (page - 1) * size;

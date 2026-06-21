@@ -4,7 +4,7 @@ import com.madayV3.blog.dto.SubscriptionDto;
 import com.madayV3.blog.mapper.MemberMapper;
 import com.madayV3.blog.mapper.PlanMapper;
 import com.madayV3.blog.mapper.SubscriptionMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +13,12 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/subscriptions")
+@RequiredArgsConstructor
 public class SubscriptionController {
 
-    @Autowired
-    private SubscriptionMapper subscriptionMapper;
-    @Autowired
-    private MemberMapper memberMapper;
-    @Autowired
-    private PlanMapper planMapper;
+    private final SubscriptionMapper subscriptionMapper;
+    private final MemberMapper memberMapper;
+    private final PlanMapper planMapper;
 
     @GetMapping
     public String list(@RequestParam(defaultValue = "1") int page, Model model) {

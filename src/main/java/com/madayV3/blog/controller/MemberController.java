@@ -2,7 +2,7 @@ package com.madayV3.blog.controller;
 
 import com.madayV3.blog.dto.MemberDto;
 import com.madayV3.blog.service.MemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +12,10 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/members")
+@RequiredArgsConstructor
 public class MemberController {
 
-    @Autowired
-    private MemberService memberService;
+    private final MemberService memberService;
 
     @GetMapping
     public String list(@RequestParam(defaultValue = "1") int page,
